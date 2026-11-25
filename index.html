@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#145a52">
+  <meta name="description" content="Demo Konsultasi Rumah Sakit Personality">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <title>Konsultasi Rumah Sakit Personality</title>
+  <style>
+    :root{font-family:Arial,sans-serif;color:#18312e;background:#f4f8f7}
+    *{box-sizing:border-box} body{margin:0}
+    header{background:#145a52;color:white;padding:22px max(20px,calc((100% - 960px)/2))}
+    header h1{font-size:22px;margin:0 0 6px} header p{margin:0;color:#d9efeb}
+    main{max-width:960px;margin:26px auto;padding:0 18px}
+    .notice{background:#fff6df;border:1px solid #f0d99a;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5}
+    h2{font-size:19px;margin:24px 0 12px}
+    .rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+    button{font:inherit;cursor:pointer}
+    .room,.panel{background:white;border:1px solid #dce8e5;border-radius:14px;padding:16px}
+    .room{text-align:left;color:inherit}.room strong{display:block;margin-bottom:6px}
+    .room span,.muted{color:#647a76;font-size:13px}
+    .panel{margin-top:16px;display:none}
+    .actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+    .actions button,.install{border:0;border-radius:9px;padding:11px 14px;background:#145a52;color:white}
+    .actions .secondary{background:#e5efed;color:#18312e}
+    .chat{height:150px;overflow:auto;background:#f5f8f7;border-radius:10px;padding:12px;margin-top:12px;font-size:14px}
+    input{padding:11px;border:1px solid #cbd9d6;border-radius:8px;min-width:0;flex:1}
+    .send{display:flex;gap:8px;margin-top:8px}
+    footer{max-width:960px;margin:28px auto;padding:0 18px 30px;color:#6a7d79;font-size:12px}
+    #installBtn{display:none;margin-top:14px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Konsultasi Rumah Sakit Personality</h1>
+  <p>Demo layanan konsultasi rumah sakit</p>
+</header>
+<main>
+  <div class="notice"><strong>Versi percobaan.</strong> Data dokter dan jadwal masih contoh. Chat, telepon, video, OTP, dan penyimpanan belum terhubung ke layanan nyata. Jangan masukkan data pribadi atau data kesehatan sungguhan.</div>
+  <button class="install" id="installBtn">Pasang aplikasi</button>
+  <h2>Pilih Menu Ruangan</h2>
+  <div class="rooms">
+    <button class="room" data-room="Dokter Umum"><strong>Dokter Umum</strong><span>Konsultasi kesehatan umum</span></button>
+    <button class="room" data-room="Menu Anak"><strong>Menu Anak</strong><span>Layanan kesehatan anak</span></button>
+    <button class="room" data-room="Menu Gigi"><strong>Menu Gigi</strong><span>Konsultasi kesehatan gigi</span></button>
+    <button class="room" data-room="Penyakit Dalam"><strong>Penyakit Dalam</strong><span>Konsultasi penyakit dalam</span></button>
+  </div>
+  <section class="panel" id="doctorPanel">
+    <h2 id="roomTitle">Dokter Umum</h2>
+    <strong>dr. Andi Pratama</strong>
+    <p class="muted">Jadwal contoh: Senin–Jumat, 09.00–12.00</p>
+    <p class="muted">Status mengikuti jadwal rumah sakit.</p>
+    <div class="actions">
+      <button id="chatBtn">Chat</button><button class="secondary" id="voiceBtn">Telepon</button><button class="secondary" id="videoBtn">Video Call</button>
+    </div>
+    <div id="chatArea" style="display:none">
+      <div class="chat" id="messages">Sistem: Ini ruang chat simulasi. Belum terkirim ke dokter.</div>
+      <div class="send"><input id="messageInput" placeholder="Tulis pesan simulasi"><button class="install" id="sendBtn">Kirim</button></div>
+    </div>
+    <p id="callInfo" class="muted"></p>
+  </section>
+</main>
+<footer>Prototype awal • Satu rumah sakit dan satu dokter contoh • Sistem produksi memerlukan backend, autentikasi, perlindungan data, dan integrasi komunikasi.</footer>
+<script>
+  document.querySelectorAll('.room').forEach(btn => btn.addEventListener('click', () => {
+    document.getElementById('doctorPanel').style.display='block';
+    document.getElementById('roomTitle').textContent=btn.dataset.room;
+    document.getElementById('chatArea').style.display='none';
+    document.getElementById('callInfo').textContent='';
+    document.getElementById('doctorPanel').scrollIntoView({behavior:'smooth'});
+  }));
+  document.getElementById('chatBtn').onclick=()=>{document.getElementById('chatArea').style.display='block';document.getElementById('callInfo').textContent='';};
+  document.getElementById('sendBtn').onclick=()=>{
+    const input=document.getElementById('messageInput'); if(!input.value.trim())return;
+    const p=document.createElement('p'); p.textContent='Anda: '+input.value;
+    document.getElementById('messages').appendChild(p); input.value='';
+  };
+  document.getElementById('voiceBtn').onclick=()=>{document.getElementById('callInfo').textContent='Simulasi telepon: fitur audio belum aktif.';};
+  document.getElementById('videoBtn').onclick=()=>{document.getElementById('callInfo').textContent='Simulasi video call: fitur video belum aktif.';};
+  let installPrompt;
+  window.addEventListener('beforeinstallprompt', e=>{e.preventDefault();installPrompt=e;document.getElementById('installBtn').style.display='inline-block';});
+  document.getElementById('installBtn').onclick=async()=>{
+    if(!installPrompt){alert('Gunakan menu browser: Install app / Tambahkan ke layar utama.');return;}
+    installPrompt.prompt(); await installPrompt.userChoice; installPrompt=null;
+  };
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  }
+</script>
+</body>
+</html>
